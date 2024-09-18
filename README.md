@@ -8,7 +8,7 @@ An incredibly simple HTML creation tool for [Go](https://go.dev).
 go get github.com/judah-caruso/htm
 ```
 
-## Usage
+## General Usage
 
 ```go
 import (
@@ -72,6 +72,41 @@ func User(name string, loggedIn bool) htm.Element {
 func main() {
    // ...
    out := Home().Render() // send to client, etc.
+}
+```
+
+## Advanced Usage
+
+```go
+// CustomElement returns a new html <custom-el> element.
+func CustomElement(body ...htm.Element) htm.Element {
+   return htm.Make("custom-el", body)
+}
+
+// MyElement is a custom htm.Element that has its own state.
+type MyElement struct {
+   username string
+   loggedIn bool
+   // ...
+}
+
+func (m MyElement) Render() string {
+   base := func(body ...htm.Element) string {
+      return htm.Join(
+         htm.Div(htm.Id("my-element"), htm.Class("element")),
+         body,
+      ).Render()
+   }
+
+   if m.loggedIn {
+      return base(
+         htm.H1(htm.Textf("Welcome back, %s", m.username)),
+      )
+   } else {
+      return base(
+         htm.H1(htm.Text("Please login")),
+      )
+   }
 }
 ```
 
