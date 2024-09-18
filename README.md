@@ -2,12 +2,13 @@
 
 An incredibly simple HTML creation tool for [Go](https://go.dev).
 
-# Installation
+## Installation
 
 ```sh
 go get github.com/judah-caruso/htm
 ```
-# Usage
+
+## Usage
 
 ```go
 import (
@@ -73,3 +74,7 @@ func main() {
    out := Home().Render() // send to client, etc.
 }
 ```
+
+## License
+
+Public Domain. See [LICENSE](LICENSE) for details.
