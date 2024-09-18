@@ -1,7 +1,9 @@
-package htm
+package htm_test
 
 import (
 	"testing"
+
+	. "github.com/judah-caruso/htm"
 )
 
 func TestRendering(t *testing.T) {
