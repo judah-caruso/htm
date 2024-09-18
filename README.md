@@ -94,7 +94,7 @@ func (m MyElement) Render() string {
    base := func(body ...htm.Element) string {
       return htm.Join(
          htm.Div(htm.Id("my-element"), htm.Class("element")),
-         body,
+         body...,
       ).Render()
    }
 

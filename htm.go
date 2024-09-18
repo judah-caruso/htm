@@ -1,4 +1,4 @@
-package htm
+package main
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ type Element interface {
 
 // Make returns a new html element. Useful for creating new/non-standard elements.
 func Make(tag string, body ...Element) Element {
-	return build(tag, true, false).withBody(body)
+	return build(tag, false, false).withBody(body)
 }
 
 // MakeSelfClosing returns a new self closing html element.
