@@ -177,14 +177,19 @@ func List(ordered bool, items ...Element) Element {
 	return Make("ul", items...)
 }
 
-// ListItem returns a new <li> element.
+// ListItem returns a new html <li> element.
 func ListItem(body ...Element) Element {
 	return Make("li", body...)
 }
 
-// A returns a new <a href="..."> element.
+// A returns a new html <a href="..."> element.
 func A(href string, body ...Element) Element {
 	return Make("a", append(body, Href(href))...)
+}
+
+// Br returns a new html <br/> element.
+func Br() Element {
+	return MakeSelfClosing("br")
 }
 
 type text string
