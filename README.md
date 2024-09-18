@@ -1,6 +1,6 @@
 # HTM
 
-An incredibly simple HTML creation tool for [Go](https://go.dev).
+An incredibly simple HTML creation tool for [Go](https://go.dev). Sometimes you just want to generates some HTML without using the template library.
 
 ## Installation
 
