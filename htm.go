@@ -40,9 +40,19 @@ func Id(id string) Element {
 	return Attr("id", id)
 }
 
-// Class returns a new id attribute.
+// Class returns a new class attribute.
 func Class(class string) Element {
 	return Attr("class", class)
+}
+
+// Name returns a new name attribute.
+func Name(name string) Element {
+	return Attr("name", name)
+}
+
+// Type returns a new type attribute.
+func Type(typ string) Element {
+	return Attr("type", typ)
 }
 
 // Style returns a new style attribute.
@@ -60,6 +70,16 @@ func Href(href string) Element {
 	return Attr("href", href)
 }
 
+// Alt returns a new alt attribute.
+func Alt(alt string) Element {
+	return Attr("alt", alt)
+}
+
+// Src returns a new src attribute.
+func Src(src string) Element {
+	return Attr("src", src)
+}
+
 // If returns an element based on the given condition.
 func If(cond bool, whenTrue, whenFalse Element) Element {
 	if cond {
@@ -69,11 +89,28 @@ func If(cond bool, whenTrue, whenFalse Element) Element {
 	}
 }
 
+// When returns an element only if the given condition is true.
+// Equivalent to: If(cond, ..., Empty())
+func When(cond bool, whenTrue Element) Element {
+	return If(cond, whenTrue, Empty())
+}
+
 // Map takes a list of values and returns their concatenation as Fragment.
 func Map[T any](values []T, iter func(T) Element) Element {
-	var body []Element
-	for _, v := range values {
-		body = append(body, iter(v))
+	return MapIdx(values, func(v T, _ int) Element {
+		return iter(v)
+	})
+}
+
+// MapIdx takes a list of values and returns their concatenation as Fragment.
+func MapIdx[T any](values []T, iter func(T, int) Element) Element {
+	if values == nil {
+		return Empty()
+	}
+
+	body := make([]Element, len(values))
+	for i, v := range values {
+		body[i] = iter(v, i)
 	}
 
 	return Fragment(body...)
@@ -90,22 +127,17 @@ func Join(parent Element, children ...Element) Element {
 
 // Meta returns a new html <meta> element.
 func Meta(body ...Element) Element {
-	return build("meta", false, false).withBody(body)
+	return Make("meta", body...)
 }
 
-// Title returns a new html <title> element.
-func Title(title string) Element {
-	return build("title", false, false).withBody([]Element{Text(title)})
+// Title returns a new html <title> element from text (can be formatted).
+func Title(title string, args ...any) Element {
+	return Make("title", Text(title, args...))
 }
 
-// Text returns a new html element from text.
-func Text(str string) Element {
-	return text(str)
-}
-
-// Textf returns a new html element from formatted text.
-func Textf(format string, args ...any) Element {
-	return text(fmt.Sprintf(format, args...))
+// Text returns a new html element from text (can be formatted).
+func Text(txt string, args ...any) Element {
+	return text(fmt.Sprintf(txt, args...))
 }
 
 // Html returns a new html <html> element.
@@ -187,9 +219,64 @@ func A(href string, body ...Element) Element {
 	return Make("a", append(body, Href(href))...)
 }
 
+// Img returns a new html <img src="..."/> element.
+func Img(src string, attributes ...Element) Element {
+	return MakeSelfClosing("img", append(attributes, Src(src))...)
+}
+
 // Br returns a new html <br/> element.
 func Br() Element {
 	return MakeSelfClosing("br")
+}
+
+// Hr returns a new html <hr/> element.
+func Hr() Element {
+	return MakeSelfClosing("hr")
+}
+
+// Input returns a new html <input> element.
+func Input(body ...Element) Element {
+	return Make("input", body...)
+}
+
+// Textarea returns a new html <textarea> element.
+func Textarea(body ...Element) Element {
+	return Make("textarea", body...)
+}
+
+// Code returns a new html <code> element.
+func Code(body ...Element) Element {
+	return Make("code", body...)
+}
+
+// Pre returns a new html <pre> element.
+func Pre(body ...Element) Element {
+	return Make("pre", body...)
+}
+
+// Script returns a new html <script src="..."> element.
+func Script(src string) Element {
+	return Make("script", Src(src))
+}
+
+// Form returns a new html <form> element.
+func Form(body ...Element) Element {
+	return Make("form", body...)
+}
+
+// Select returns a new html <select> element.
+func Select(body ...Element) Element {
+	return Make("select", body...)
+}
+
+// Option returns a new html <option> element.
+func Option(body ...Element) Element {
+	return Make("option", body...)
+}
+
+// Label returns a new html <label for="..."> element.
+func Label(forName string, body ...Element) Element {
+	return Join(Make("label", body...), Attr("for", forName))
 }
 
 type text string
@@ -204,7 +291,11 @@ type attribute struct {
 }
 
 func (a *attribute) Render() string {
-	return fmt.Sprintf("%s=%q", a.name, a.value)
+	if a == nil {
+		return ""
+	}
+
+	return fmt.Sprintf("%s='%s'", a.name, a.value)
 }
 
 type builder struct {
@@ -216,7 +307,7 @@ type builder struct {
 }
 
 func (b *builder) Render() string {
-	if len(b.tag) == 0 {
+	if b == nil || len(b.tag) == 0 {
 		return ""
 	}
 
@@ -252,6 +343,10 @@ func (b *builder) Render() string {
 	sb.WriteString(">")
 
 	for _, el := range b.body {
+		if el == nil {
+			continue
+		}
+
 		sb.WriteString(el.Render())
 	}
 
